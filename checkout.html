@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | ShopSphere</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="logo">ShopSphere</a>
+
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search for products, brands and more...">
+                <span class="search-icon">🔍</span>
+            </div>
+
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="nav-links" id="navLinks">
+                <div class="nav-item cart-icon-wrapper" onclick="window.location.href='cart.html'">
+                    🛒 Cart
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </div>
+
+                <button class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">🌙</button>
+
+                <div class="profile-dropdown">
+                    <div class="profile-btn" id="profileBtn">
+                        <span id="profileName">Login</span>
+                        <span>▾</span>
+                    </div>
+                    <div class="dropdown-menu" id="profileDropdown">
+                        <div class="dropdown-item" onclick="window.location.href='#orders'">📦 My Orders</div>
+                        <div class="dropdown-item" onclick="window.location.href='#wishlist'">❤️ Wishlist</div>
+                        <div class="dropdown-item" onclick="window.location.href='#account'">👤 My Account</div>
+                        <div class="dropdown-item" id="logoutBtn">🚪 Logout</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Checkout Container -->
+    <div class="checkout-container container">
+        <h1 style="margin-bottom: 30px; font-size: 32px;">💳 Checkout</h1>
+
+        <div class="checkout-grid">
+            <!-- Left Side - Forms -->
+            <div>
+                <!-- Delivery Address -->
+                <div class="checkout-section">
+                    <h3 class="section-heading">📍 Delivery Address</h3>
+                    <form class="address-form" id="addressForm">
+                        <div class="form-group">
+                            <label>Full Name *</label>
+                            <input type="text" id="fullName" placeholder="Enter your full name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Mobile Number *</label>
+                            <input type="tel" id="mobile" placeholder="10-digit mobile number" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="email" placeholder="Enter your email">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Address *</label>
+                            <input type="text" id="address" placeholder="House No., Building Name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>City *</label>
+                            <input type="text" id="city" placeholder="City" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>State *</label>
+                            <input type="text" id="state" placeholder="State" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Pincode *</label>
+                            <input type="text" id="pincode" placeholder="6-digit pincode" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Landmark (Optional)</label>
+                            <input type="text" id="landmark" placeholder="Near by landmark">
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="checkout-section">
+                    <h3 class="section-heading">💰 Payment Method</h3>
+                    <div class="payment-options">
+                        <label class="payment-option selected">
+                            <input type="radio" name="payment" value="upi" checked>
+                            <div>
+                                <strong>UPI</strong>
+                                <p style="font-size: 13px; color: var(--text-gray); margin-top: 5px;">
+                                    Google Pay, PhonePe, Paytm & more
+                                </p>
+                            </div>
+                        </label>
+
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="card">
+                            <div>
+                                <strong>Credit / Debit Card</strong>
+                                <p style="font-size: 13px; color: var(--text-gray); margin-top: 5px;">
+                                    Visa, Mastercard, RuPay
+                                </p>
+                            </div>
+                        </label>
+
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="netbanking">
+                            <div>
+                                <strong>Net Banking</strong>
+                                <p style="font-size: 13px; color: var(--text-gray); margin-top: 5px;">
+                                    All major banks supported
+                                </p>
+                            </div>
+                        </label>
+
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="cod">
+                            <div>
+                                <strong>Cash on Delivery</strong>
+                                <p style="font-size: 13px; color: var(--text-gray); margin-top: 5px;">
+                                    Pay when you receive
+                                </p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side - Order Summary -->
+            <div>
+                <div class="cart-summary">
+                    <h3 class="summary-title">Order Summary</h3>
+                    
+                    <div id="orderItems" style="max-height: 300px; overflow-y: auto; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid var(--border-light);">
+                        <!-- Order items will be loaded here -->
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span id="subtotal">₹0</span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>Delivery Charges</span>
+                        <span id="delivery">₹0</span>
+                    </div>
+                    
+                    <div class="summary-row total">
+                        <span>Total Amount</span>
+                        <span id="total">₹0</span>
+                    </div>
+                    
+                    <button class="btn btn-primary checkout-btn" onclick="placeOrder()">
+                        Place Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <svg class="success-animation checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+            </svg>
+            <h2>Order Placed Successfully!</h2>
+            <p>Thank you for your purchase. Your order will be delivered soon.</p>
+            <p style="color: var(--primary-blue); font-weight: 600; margin-top: 10px;">
+                Order ID: <span id="orderId"></span>
+            </p>
+            <button class="btn btn-primary" onclick="goToHome()">
+                Continue Shopping
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">✓</span>
+        <span class="toast-message">Action successful</span>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        // Load order summary
+        function loadOrderSummary() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            
+            if (cart.length === 0) {
+                window.location.href = 'cart.html';
+                return;
+            }
+
+            // Display order items
+            const orderItemsContainer = document.getElementById('orderItems');
+            orderItemsContainer.innerHTML = cart.map(item => `
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-light);">
+                    <img src="${item.image}" alt="${item.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                    <div style="flex: 1;">
+                        <p style="font-size: 14px; font-weight: 600; margin-bottom: 5px;">${item.name}</p>
+                        <p style="font-size: 13px; color: var(--text-gray);">Qty: ${item.quantity}</p>
+                        <p style="font-size: 15px; font-weight: 700; color: var(--primary-blue);">₹${(item.price * item.quantity).toLocaleString()}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            // Calculate totals
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const delivery = subtotal > 500 ? 0 : 40;
+            const total = subtotal + delivery;
+
+            document.getElementById('subtotal').textContent = `₹${subtotal.toLocaleString()}`;
+            document.getElementById('delivery').textContent = delivery === 0 ? 'FREE' : `₹${delivery}`;
+            document.getElementById('delivery').style.color = delivery === 0 ? 'var(--success-green)' : 'inherit';
+            document.getElementById('total').textContent = `₹${total.toLocaleString()}`;
+        }
+
+        // Payment option selection
+        document.querySelectorAll('.payment-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.payment-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                this.querySelector('input[type="radio"]').checked = true;
+            });
+        });
+
+        // Pre-fill form if user data exists
+        function prefillForm() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            if (user.name) {
+                document.getElementById('fullName').value = user.name;
+            }
+            if (user.email) {
+                document.getElementById('email').value = user.email;
+            }
+            if (user.mobile) {
+                document.getElementById('mobile').value = user.mobile;
+            }
+        }
+
+        // Validate form
+        function validateForm() {
+            const fullName = document.getElementById('fullName').value.trim();
+            const mobile = document.getElementById('mobile').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const state = document.getElementById('state').value.trim();
+            const pincode = document.getElementById('pincode').value.trim();
+
+            if (!fullName) {
+                showToast('Please enter your full name', 'error');
+                return false;
+            }
+
+            if (!mobile || mobile.length !== 10 || !/^\d{10}$/.test(mobile)) {
+                showToast('Please enter a valid 10-digit mobile number', 'error');
+                return false;
+            }
+
+            if (!address) {
+                showToast('Please enter your address', 'error');
+                return false;
+            }
+
+            if (!city) {
+                showToast('Please enter your city', 'error');
+                return false;
+            }
+
+            if (!state) {
+                showToast('Please enter your state', 'error');
+                return false;
+            }
+
+            if (!pincode || pincode.length !== 6 || !/^\d{6}$/.test(pincode)) {
+                showToast('Please enter a valid 6-digit pincode', 'error');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Place Order
+        function placeOrder() {
+            if (!validateForm()) {
+                return;
+            }
+
+            const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            
+            // Generate order ID
+            const orderId = 'ORD' + Date.now().toString().slice(-8);
+            
+            // Create order object
+            const order = {
+                orderId: orderId,
+                items: cart,
+                address: {
+                    fullName: document.getElementById('fullName').value,
+                    mobile: document.getElementById('mobile').value,
+                    email: document.getElementById('email').value,
+                    address: document.getElementById('address').value,
+                    city: document.getElementById('city').value,
+                    state: document.getElementById('state').value,
+                    pincode: document.getElementById('pincode').value,
+                    landmark: document.getElementById('landmark').value
+                },
+                paymentMethod: paymentMethod,
+                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                date: new Date().toISOString()
+            };
+
+            // Save order to localStorage
+            let orders = JSON.parse(localStorage.getItem('orders')) || [];
+            orders.push(order);
+            localStorage.setItem('orders', JSON.stringify(orders));
+
+            // Clear cart
+            localStorage.removeItem('cart');
+
+            // Show success modal
+            document.getElementById('orderId').textContent = orderId;
+            document.getElementById('successModal').classList.add('active');
+        }
+
+        function goToHome() {
+            window.location.href = 'index.html';
+        }
+
+        // Load order summary on page load
+        loadOrderSummary();
+        prefillForm();
+        updateCartBadge();
+        updateProfileName();
+
+        // Check if user is logged in
+        const user = localStorage.getItem('user');
+        if (!user) {
+            showToast('Please login to continue', 'error');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

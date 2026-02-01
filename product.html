@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details | ShopSphere</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="logo">ShopSphere</a>
+
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search for products, brands and more...">
+                <span class="search-icon">🔍</span>
+            </div>
+
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="nav-links" id="navLinks">
+                <div class="categories-dropdown">
+                    <div class="nav-item">Categories ▾</div>
+                    <div class="categories-menu">
+                        <div class="category-item">📱 Electronics</div>
+                        <div class="category-item">👔 Fashion</div>
+                        <div class="category-item">🏠 Home & Kitchen</div>
+                        <div class="category-item">📚 Books</div>
+                        <div class="category-item">⚽ Sports</div>
+                    </div>
+                </div>
+
+                <div class="nav-item" onclick="window.location.href='#wishlist'">❤️ Wishlist</div>
+                <div class="nav-item notification-icon">
+                    🔔
+                    <span class="notification-badge">3</span>
+                </div>
+
+                <div class="nav-item cart-icon-wrapper" onclick="window.location.href='cart.html'">
+                    🛒 Cart
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </div>
+
+                <button class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">🌙</button>
+
+                <div class="profile-dropdown">
+                    <div class="profile-btn" id="profileBtn">
+                        <span id="profileName">Login</span>
+                        <span>▾</span>
+                    </div>
+                    <div class="dropdown-menu" id="profileDropdown">
+                        <div class="dropdown-item" onclick="window.location.href='#orders'">📦 My Orders</div>
+                        <div class="dropdown-item" onclick="window.location.href='#wishlist'">❤️ Wishlist</div>
+                        <div class="dropdown-item" onclick="window.location.href='#account'">👤 My Account</div>
+                        <div class="dropdown-item" id="logoutBtn">🚪 Logout</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Product Detail Container -->
+    <div class="product-detail-container container">
+        <div class="product-detail-grid">
+            <!-- Product Image Section -->
+            <div class="product-image-section">
+                <button class="wishlist-btn" id="productWishlistBtn">
+                    ❤️
+                </button>
+                <img src="" alt="Product Image" class="main-image" id="productImage">
+            </div>
+
+            <!-- Product Info Section -->
+            <div class="product-info-section">
+                <h1 class="product-detail-title" id="productTitle">Loading...</h1>
+
+                <div class="product-detail-rating">
+                    <div class="stars" id="productStars">⭐⭐⭐⭐⭐</div>
+                    <span class="rating-count" id="productRatingCount">(0 ratings)</span>
+                </div>
+
+                <div class="product-detail-price">
+                    <span class="current-price" id="productCurrentPrice">₹0</span>
+                    <span class="original-price" id="productOriginalPrice">₹0</span>
+                    <span class="discount" id="productDiscount">0% OFF</span>
+                </div>
+
+                <div class="product-description" id="productDescription">
+                    Loading product description...
+                </div>
+
+                <div class="quantity-selector">
+                    <span style="font-weight: 600;">Quantity:</span>
+                    <button class="quantity-btn" onclick="decreaseQuantity()">-</button>
+                    <span class="quantity-value" id="quantityValue">1</span>
+                    <button class="quantity-btn" onclick="increaseQuantity()">+</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-accent" onclick="addToCartFromDetail()">
+                        🛒 Add to Cart
+                    </button>
+                    <button class="btn btn-primary" onclick="buyNow()">
+                        ⚡ Buy Now
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products -->
+        <section class="fade-in" style="margin-top: 60px;">
+            <div class="section-header">
+                <h2 class="section-title">Similar Products</h2>
+                <a class="view-all">View All →</a>
+            </div>
+            <div class="product-grid" id="similarProducts">
+                <!-- Similar products will be loaded here -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">✓</span>
+        <span class="toast-message">Action successful</span>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-icon success">✓</div>
+            <h2>Success!</h2>
+            <p>Your action was completed successfully</p>
+            <button class="btn btn-primary" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        // Get product ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+
+        let currentQuantity = 1;
+
+        // Load product details
+        function loadProductDetails() {
+            const product = getProductById(productId);
+            
+            if (!product) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Update product details
+            document.getElementById('productImage').src = product.image;
+            document.getElementById('productTitle').textContent = product.name;
+            document.getElementById('productStars').textContent = '⭐'.repeat(Math.floor(product.rating));
+            document.getElementById('productRatingCount').textContent = `(${product.reviews} ratings)`;
+            document.getElementById('productCurrentPrice').textContent = `₹${product.price.toLocaleString()}`;
+            document.getElementById('productOriginalPrice').textContent = `₹${product.originalPrice.toLocaleString()}`;
+            document.getElementById('productDiscount').textContent = `${product.discount}% OFF`;
+            document.getElementById('productDescription').textContent = product.description;
+
+            // Update page title
+            document.title = `${product.name} | ShopSphere`;
+
+            // Check if in wishlist
+            updateWishlistButton();
+
+            // Load similar products
+            loadSimilarProducts(product.category);
+        }
+
+        function increaseQuantity() {
+            currentQuantity++;
+            document.getElementById('quantityValue').textContent = currentQuantity;
+        }
+
+        function decreaseQuantity() {
+            if (currentQuantity > 1) {
+                currentQuantity--;
+                document.getElementById('quantityValue').textContent = currentQuantity;
+            }
+        }
+
+        function addToCartFromDetail() {
+            const product = getProductById(productId);
+            if (!product) return;
+
+            addToCart(product, currentQuantity);
+            
+            // Animate product flying to cart
+            animateAddToCart();
+            
+            showToast('Added to cart successfully!', 'success');
+        }
+
+        function buyNow() {
+            const product = getProductById(productId);
+            if (!product) return;
+
+            addToCart(product, currentQuantity);
+            window.location.href = 'cart.html';
+        }
+
+        function animateAddToCart() {
+            const productImage = document.getElementById('productImage');
+            const cartIcon = document.querySelector('.cart-icon-wrapper');
+            
+            if (!productImage || !cartIcon) return;
+            
+            const clone = productImage.cloneNode(true);
+            const imageRect = productImage.getBoundingClientRect();
+            const cartRect = cartIcon.getBoundingClientRect();
+            
+            clone.style.position = 'fixed';
+            clone.style.left = imageRect.left + 'px';
+            clone.style.top = imageRect.top + 'px';
+            clone.style.width = imageRect.width + 'px';
+            clone.style.height = imageRect.height + 'px';
+            clone.style.zIndex = '10000';
+            clone.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+            clone.style.pointerEvents = 'none';
+            
+            document.body.appendChild(clone);
+            
+            setTimeout(() => {
+                clone.style.left = cartRect.left + 'px';
+                clone.style.top = cartRect.top + 'px';
+                clone.style.width = '40px';
+                clone.style.height = '40px';
+                clone.style.opacity = '0';
+            }, 10);
+            
+            setTimeout(() => {
+                clone.remove();
+            }, 800);
+        }
+
+        function updateWishlistButton() {
+            const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+            const btn = document.getElementById('productWishlistBtn');
+            
+            if (wishlist.includes(productId)) {
+                btn.classList.add('active');
+            }
+        }
+
+        document.getElementById('productWishlistBtn').addEventListener('click', function() {
+            toggleWishlist(productId);
+            this.classList.toggle('active');
+            
+            const isActive = this.classList.contains('active');
+            showToast(
+                isActive ? 'Added to wishlist!' : 'Removed from wishlist',
+                'success'
+            );
+        });
+
+        function loadSimilarProducts(category) {
+            const allProducts = getAllProducts();
+            const similarProducts = allProducts
+                .filter(p => p.category === category && p.id !== productId)
+                .slice(0, 4);
+            
+            const container = document.getElementById('similarProducts');
+            container.innerHTML = similarProducts.map(product => createProductCard(product)).join('');
+        }
+
+        // Load product on page load
+        loadProductDetails();
+
+        // Update cart badge
+        updateCartBadge();
+
+        // Update profile name
+        updateProfileName();
+
+        // Fade in animation
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.querySelectorAll('.fade-in').forEach(el => {
+                    el.classList.add('visible');
+                });
+            }, 100);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | ShopSphere - Premium Online Shopping</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Authentication Container -->
+    <div class="auth-container">
+        <div class="auth-card">
+            <!-- Header -->
+            <div class="auth-header">
+                <h1 class="logo">ShopSphere</h1>
+                <h2>Welcome Back!</h2>
+                <p>Login or create a new account to continue</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button class="tab-btn active" data-tab="login">Login</button>
+                <button class="tab-btn" data-tab="signup">Sign Up</button>
+            </div>
+
+            <!-- Login Form -->
+            <div class="auth-form" id="loginForm">
+                <div class="form-group">
+                    <label>Email or Mobile Number</label>
+                    <input type="text" id="loginInput" placeholder="Enter email or mobile number" required>
+                </div>
+
+                <button class="btn btn-primary" style="width: 100%;" onclick="sendOTP('login')">Send OTP</button>
+
+                <!-- OTP Container -->
+                <div class="otp-container" id="loginOtpContainer">
+                    <h3>Enter OTP</h3>
+                    <p>We've sent a 6-digit OTP to your email/mobile</p>
+                    <p style="color: var(--primary-blue); font-weight: 600; margin: 10px 0;">
+                        Your OTP: <span id="loginGeneratedOTP"></span>
+                    </p>
+                    <div class="otp-inputs">
+                        <input type="text" class="otp-input" maxlength="1" data-index="0">
+                        <input type="text" class="otp-input" maxlength="1" data-index="1">
+                        <input type="text" class="otp-input" maxlength="1" data-index="2">
+                        <input type="text" class="otp-input" maxlength="1" data-index="3">
+                        <input type="text" class="otp-input" maxlength="1" data-index="4">
+                        <input type="text" class="otp-input" maxlength="1" data-index="5">
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="verifyOTP('login')">
+                        Verify OTP
+                    </button>
+                    <a class="resend-otp" onclick="sendOTP('login')">Resend OTP</a>
+                </div>
+            </div>
+
+            <!-- Signup Form -->
+            <div class="auth-form" id="signupForm" style="display: none;">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signupName" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="signupEmail" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="tel" id="signupMobile" placeholder="Enter your mobile number" required>
+                </div>
+
+                <button class="btn btn-primary" style="width: 100%;" onclick="sendOTP('signup')">Create Account</button>
+
+                <!-- OTP Container -->
+                <div class="otp-container" id="signupOtpContainer">
+                    <h3>Verify Your Account</h3>
+                    <p>We've sent a 6-digit OTP to verify your account</p>
+                    <p style="color: var(--primary-blue); font-weight: 600; margin: 10px 0;">
+                        Your OTP: <span id="signupGeneratedOTP"></span>
+                    </p>
+                    <div class="otp-inputs">
+                        <input type="text" class="otp-input" maxlength="1" data-index="0">
+                        <input type="text" class="otp-input" maxlength="1" data-index="1">
+                        <input type="text" class="otp-input" maxlength="1" data-index="2">
+                        <input type="text" class="otp-input" maxlength="1" data-index="3">
+                        <input type="text" class="otp-input" maxlength="1" data-index="4">
+                        <input type="text" class="otp-input" maxlength="1" data-index="5">
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="verifyOTP('signup')">
+                        Verify & Create Account
+                    </button>
+                    <a class="resend-otp" onclick="sendOTP('signup')">Resend OTP</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">✓</span>
+        <span class="toast-message">Action successful</span>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        // Tab Switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active from all tabs
+                document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+                
+                // Add active to clicked tab
+                this.classList.add('active');
+                
+                // Show/hide forms
+                const tab = this.getAttribute('data-tab');
+                document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+                document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
+                
+                // Hide OTP containers
+                document.getElementById('loginOtpContainer').classList.remove('active');
+                document.getElementById('signupOtpContainer').classList.remove('active');
+            });
+        });
+
+        // OTP Input Auto-focus and Navigation
+        document.querySelectorAll('.otp-input').forEach((input, index, inputs) => {
+            input.addEventListener('input', function(e) {
+                if (this.value.length === 1 && index < inputs.length - 1) {
+                    // Move to next input
+                    const nextInput = Array.from(inputs).find(i => 
+                        i.getAttribute('data-index') == index + 1 && 
+                        i.closest('.otp-container').classList.contains('active')
+                    );
+                    if (nextInput) nextInput.focus();
+                }
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && this.value === '' && index > 0) {
+                    // Move to previous input
+                    const prevInput = Array.from(inputs).find(i => 
+                        i.getAttribute('data-index') == index - 1 && 
+                        i.closest('.otp-container').classList.contains('active')
+                    );
+                    if (prevInput) prevInput.focus();
+                }
+            });
+
+            // Only allow numbers
+            input.addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        });
+
+        // Send OTP Function
+        function sendOTP(type) {
+            let input;
+            if (type === 'login') {
+                input = document.getElementById('loginInput').value;
+            } else {
+                const name = document.getElementById('signupName').value;
+                const email = document.getElementById('signupEmail').value;
+                const mobile = document.getElementById('signupMobile').value;
+                
+                if (!name || !email || !mobile) {
+                    showToast('Please fill all fields', 'error');
+                    return;
+                }
+                input = email;
+            }
+
+            if (!input) {
+                showToast('Please enter email or mobile number', 'error');
+                return;
+            }
+
+            // Generate random 6-digit OTP
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            // Store OTP in session
+            sessionStorage.setItem(`${type}OTP`, otp);
+            
+            // Display OTP (in real app, this would be sent via SMS/Email)
+            document.getElementById(`${type}GeneratedOTP`).textContent = otp;
+            
+            // Show OTP container with animation
+            document.getElementById(`${type}OtpContainer`).classList.add('active');
+            
+            // Clear previous OTP inputs
+            document.querySelectorAll(`#${type}OtpContainer .otp-input`).forEach(input => {
+                input.value = '';
+            });
+            
+            // Focus first OTP input
+            setTimeout(() => {
+                document.querySelector(`#${type}OtpContainer .otp-input`).focus();
+            }, 300);
+            
+            showToast('OTP sent successfully!', 'success');
+        }
+
+        // Verify OTP Function
+        function verifyOTP(type) {
+            const otpInputs = document.querySelectorAll(`#${type}OtpContainer .otp-input`);
+            const enteredOTP = Array.from(otpInputs).map(input => input.value).join('');
+            const storedOTP = sessionStorage.getItem(`${type}OTP`);
+
+            if (enteredOTP.length !== 6) {
+                showToast('Please enter complete OTP', 'error');
+                return;
+            }
+
+            if (enteredOTP === storedOTP) {
+                // Store user data in localStorage
+                const userData = {
+                    isLoggedIn: true,
+                    loginTime: new Date().toISOString()
+                };
+
+                if (type === 'signup') {
+                    userData.name = document.getElementById('signupName').value;
+                    userData.email = document.getElementById('signupEmail').value;
+                    userData.mobile = document.getElementById('signupMobile').value;
+                } else {
+                    userData.identifier = document.getElementById('loginInput').value;
+                }
+
+                localStorage.setItem('user', JSON.stringify(userData));
+                
+                showToast(type === 'login' ? 'Login Successful!' : 'Account Created Successfully!', 'success');
+                
+                // Redirect to homepage after 1.5 seconds
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+            } else {
+                showToast('Invalid OTP. Please try again.', 'error');
+                
+                // Clear OTP inputs
+                otpInputs.forEach(input => input.value = '');
+                otpInputs[0].focus();
+            }
+        }
+
+        // Show Toast Notification
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            const icon = toast.querySelector('.toast-icon');
+            const messageEl = toast.querySelector('.toast-message');
+            
+            messageEl.textContent = message;
+            toast.className = `toast ${type}`;
+            icon.textContent = type === 'success' ? '✓' : '✕';
+            
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Check if already logged in
+        const user = localStorage.getItem('user');
+        if (user) {
+            const userData = JSON.parse(user);
+            if (userData.isLoggedIn) {
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>
