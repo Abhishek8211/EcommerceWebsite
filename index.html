@@ -7,6 +7,26 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- Sticky Offer Banner -->
+    <div class="offer-banner" id="offerBanner">
+        🎉 MEGA SALE! Get up to 70% OFF + Extra 10% on first order | 
+        <span class="countdown-timer">
+            <span class="countdown-item">
+                <span class="countdown-number" id="hours">00</span>
+                <span class="countdown-label">Hours</span>
+            </span>
+            <span class="countdown-item">
+                <span class="countdown-number" id="minutes">00</span>
+                <span class="countdown-label">Mins</span>
+            </span>
+            <span class="countdown-item">
+                <span class="countdown-number" id="seconds">00</span>
+                <span class="countdown-label">Secs</span>
+            </span>
+        </span>
+        <button class="close-banner" onclick="closeBanner()">×</button>
+    </div>
+
     <!-- Navbar -->
     <nav class="navbar">
         <div class="navbar-container">
@@ -30,15 +50,42 @@
 
             <!-- Nav Links -->
             <div class="nav-links" id="navLinks">
-                <!-- Categories -->
+                <!-- Categories with Mega Menu -->
                 <div class="categories-dropdown">
                     <div class="nav-item">Categories ▾</div>
-                    <div class="categories-menu">
-                        <div class="category-item" onclick="filterByCategory('electronics')">📱 Electronics</div>
-                        <div class="category-item" onclick="filterByCategory('fashion')">👔 Fashion</div>
-                        <div class="category-item" onclick="filterByCategory('home')">🏠 Home & Kitchen</div>
-                        <div class="category-item" onclick="filterByCategory('books')">📚 Books</div>
-                        <div class="category-item" onclick="filterByCategory('sports')">⚽ Sports</div>
+                    <div class="mega-menu">
+                        <div class="mega-menu-column">
+                            <h4>📱 Electronics</h4>
+                            <div class="mega-menu-item" onclick="filterByCategory('mobiles')">Mobiles</div>
+                            <div class="mega-menu-item" onclick="filterByCategory('laptops')">Laptops</div>
+                            <div class="mega-menu-item" onclick="filterByCategory('headphones')">Headphones</div>
+                            <div class="mega-menu-item" onclick="filterByCategory('cameras')">Cameras</div>
+                            <div class="mega-menu-item" onclick="filterByCategory('accessories')">Accessories</div>
+                        </div>
+                        <div class="mega-menu-column">
+                            <h4>👔 Fashion</h4>
+                            <div class="mega-menu-item" onclick="filterByCategory('fashion')">Men's Clothing</div>
+                            <div class="mega-menu-item" onclick="filterByCategory('fashion')">Women's Clothing</div>
+                            <div class="mega-menu-item" onclick="filterByCategory('fashion')">Footwear</div>
+                            <div class="mega-menu-item" onclick="filterByCategory('fashion')">Watches</div>
+                            <div class="mega-menu-item" onclick="filterByCategory('fashion')">Bags</div>
+                        </div>
+                        <div class="mega-menu-column">
+                            <h4>🏠 Home & Kitchen</h4>
+                            <div class="mega-menu-item" onclick="filterByCategory('home')">Furniture</div>
+                            <div class="mega-menu-item" onclick="filterByCategory('home')">Appliances</div>
+                            <div class="mega-menu-item" onclick="filterByCategory('home')">Decor</div>
+                            <div class="mega-menu-item" onclick="filterByCategory('home')">Cookware</div>
+                            <div class="mega-menu-item" onclick="filterByCategory('home')">Bedding</div>
+                        </div>
+                        <div class="mega-menu-column">
+                            <h4>⚽ Sports & More</h4>
+                            <div class="mega-menu-item" onclick="filterByCategory('sports')">Fitness</div>
+                            <div class="mega-menu-item" onclick="filterByCategory('sports')">Outdoor</div>
+                            <div class="mega-menu-item" onclick="filterByCategory('books')">Books</div>
+                            <div class="mega-menu-item" onclick="filterByCategory('sports')">Toys</div>
+                            <div class="mega-menu-item" onclick="filterByCategory('sports')">Gaming</div>
+                        </div>
                     </div>
                 </div>
 
@@ -48,9 +95,22 @@
                 </div>
 
                 <!-- Notifications -->
-                <div class="nav-item notification-icon">
-                    🔔
-                    <span class="notification-badge">3</span>
+                <div class="nav-item notification-icon" id="notificationBell">
+                    <div class="bell-wrapper">
+                        🔔
+                        <span class="notification-badge" id="notificationBadge">0</span>
+                    </div>
+                    
+                    <!-- Notification Dropdown Panel -->
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <div class="notification-header">
+                            <h3>Notifications</h3>
+                            <button class="mark-all-read" id="markAllRead">Mark all as read</button>
+                        </div>
+                        <div class="notification-list" id="notificationList">
+                            <!-- Notifications will be loaded here -->
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Cart -->
@@ -74,6 +134,7 @@
                         <div class="dropdown-item" onclick="window.location.href='#orders'">📦 My Orders</div>
                         <div class="dropdown-item" onclick="window.location.href='#wishlist'">❤️ Wishlist</div>
                         <div class="dropdown-item" onclick="window.location.href='#account'">👤 My Account</div>
+                        <div class="dropdown-item" onclick="simulateNewNotification()">🔔 Test Notification</div>
                         <div class="dropdown-item" id="logoutBtn">🚪 Logout</div>
                     </div>
                 </div>
@@ -83,8 +144,7 @@
 
     <!-- Hero Section -->
     <section class="hero-section">
-        <div class="container">
-            <div class="hero-slider">
+        <div class="hero-slider">
                 <!-- Slide 1 -->
                 <div class="slide active">
                     <div class="slide-content" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -125,8 +185,28 @@
                     <span class="dot" data-slide="2"></span>
                 </div>
             </div>
-        </div>
     </section>
+
+    <!-- Filter and Sort Bar -->
+    <div class="filter-sort-bar">
+        <div class="filter-group">
+            <button class="filter-btn active" onclick="filterProducts('all')">All Products</button>
+            <button class="filter-btn" onclick="filterProducts('electronics')">📱 Electronics</button>
+            <button class="filter-btn" onclick="filterProducts('fashion')">👔 Fashion</button>
+            <button class="filter-btn" onclick="filterProducts('home')">🏠 Home</button>
+            <button class="filter-btn" onclick="filterProducts('sports')">⚽ Sports</button>
+        </div>
+        <div class="filter-group">
+            <select class="sort-select" onchange="sortProducts(this.value)">
+                <option value="default">Sort By</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="rating">Top Rated</option>
+                <option value="popular">Most Popular</option>
+                <option value="discount">Best Discount</option>
+            </select>
+        </div>
+    </div>
 
     <!-- Top Deals Section -->
     <section class="container fade-in">
@@ -164,10 +244,22 @@
         </div>
     </section>
 
+    <!-- Recommended For You -->
+    <section class="container fade-in">
+        <div class="section-header">
+            <h2 class="section-title">💡 Recommended For You</h2>
+            <a class="view-all">View All →</a>
+        </div>
+
+        <div class="product-scroll" id="recommended">
+            <!-- Products will be loaded here by JavaScript -->
+        </div>
+    </section>
+
     <!-- Electronics Section -->
     <section class="container fade-in">
         <div class="section-header">
-            <h2 class="section-title">📱 Electronics</h2>
+            <h2 class="section-title">📱 Best of Electronics</h2>
             <a class="view-all">View All →</a>
         </div>
 
@@ -176,17 +268,74 @@
         </div>
     </section>
 
-    <!-- Fashion Section -->
+    <!-- Fashion Deals -->
     <section class="container fade-in">
         <div class="section-header">
-            <h2 class="section-title">👔 Fashion</h2>
+            <h2 class="section-title">👗 Fashion Deals</h2>
             <a class="view-all">View All →</a>
         </div>
 
-        <div class="product-grid" id="fashion">
+        <div class="product-scroll" id="fashion">
             <!-- Products will be loaded here by JavaScript -->
         </div>
     </section>
+
+    <!-- Recently Viewed -->
+    <section class="container fade-in">
+        <div class="section-header">
+            <h2 class="section-title">👀 Recently Viewed</h2>
+            <a class="view-all">View All →</a>
+        </div>
+
+        <div class="product-scroll" id="recentlyViewed">
+            <!-- Products will be loaded here by JavaScript -->
+        </div>
+    </section>
+
+    <!-- Wishlist Section -->
+    <section class="container fade-in" id="wishlist">
+        <div class="section-header">
+            <h2 class="section-title">❤️ My Wishlist</h2>
+            <a class="view-all">View All →</a>
+        </div>
+
+        <div class="product-grid" id="wishlistProducts">
+            <!-- Wishlist products will be loaded here by JavaScript -->
+        </div>
+    </section>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top" id="scrollToTop">↑</button>
+
+    <!-- Chat Support Button -->
+    <button class="chat-support" id="chatSupport" title="Chat with us">💬</button>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <div class="bottom-nav">
+        <div class="bottom-nav-items">
+            <div class="bottom-nav-item" onclick="window.location.href='index.html'">
+                <div class="bottom-nav-icon">🏠</div>
+                <div class="bottom-nav-label">Home</div>
+            </div>
+            <div class="bottom-nav-item" id="mobileSearch">
+                <div class="bottom-nav-icon">🔍</div>
+                <div class="bottom-nav-label">Search</div>
+            </div>
+            <div class="bottom-nav-item" onclick="window.location.href='cart.html'">
+                <div class="bottom-nav-icon">🛒</div>
+                <div class="bottom-nav-label">Cart</div>
+                <span class="cart-badge" id="mobileCartBadge">0</span>
+            </div>
+            <div class="bottom-nav-item">
+                <div class="bottom-nav-icon">❤️</div>
+                <div class="bottom-nav-label">Wishlist</div>
+            </div>
+            <div class="bottom-nav-item" onclick="window.location.href='login.html'">
+                <div class="bottom-nav-icon">👤</div>
+                <div class="bottom-nav-label">Profile</div>
+            </div>
+        </div>
+    </div>
 
     <!-- Toast Notification -->
     <div class="toast" id="toast">
