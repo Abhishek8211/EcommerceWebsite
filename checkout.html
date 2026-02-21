@@ -361,13 +361,15 @@
         updateProfileName();
 
         // Check if user is logged in
-        const user = localStorage.getItem('user');
-        if (!user) {
+        if (!isLoggedIn()) {
             showToast('Please login to continue', 'error');
             setTimeout(() => {
                 window.location.href = 'login.html';
             }, 1500);
         }
     </script>
+
+    <!-- Backend API Integration -->
+    <script src="js/api.js"></script>
 </body>
 </html>
