@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart | ShopSphere</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="logo">ShopSphere</a>
+
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search for products, brands and more...">
+                <span class="search-icon">🔍</span>
+            </div>
+
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="nav-links" id="navLinks">
+                <div class="categories-dropdown">
+                    <div class="nav-item">Categories ▾</div>
+                    <div class="categories-menu">
+                        <div class="category-item">📱 Electronics</div>
+                        <div class="category-item">👔 Fashion</div>
+                        <div class="category-item">🏠 Home & Kitchen</div>
+                        <div class="category-item">📚 Books</div>
+                        <div class="category-item">⚽ Sports</div>
+                    </div>
+                </div>
+
+                <div class="nav-item" onclick="window.location.href='#wishlist'">❤️ Wishlist</div>
+                <div class="nav-item notification-icon">
+                    🔔
+                    <span class="notification-badge">3</span>
+                </div>
+
+                <div class="nav-item cart-icon-wrapper" onclick="window.location.href='cart.html'">
+                    🛒 Cart
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </div>
+
+                <button class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">🌙</button>
+
+                <div class="profile-dropdown">
+                    <div class="profile-btn" id="profileBtn">
+                        <span id="profileName">Login</span>
+                        <span>▾</span>
+                    </div>
+                    <div class="dropdown-menu" id="profileDropdown">
+                        <div class="dropdown-item" onclick="window.location.href='#orders'">📦 My Orders</div>
+                        <div class="dropdown-item" onclick="window.location.href='#wishlist'">❤️ Wishlist</div>
+                        <div class="dropdown-item" onclick="window.location.href='#account'">👤 My Account</div>
+                        <div class="dropdown-item" id="logoutBtn">🚪 Logout</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Cart Container -->
+    <div class="cart-container container">
+        <h1 style="margin-bottom: 30px; font-size: 32px;">🛒 Shopping Cart</h1>
+
+        <div id="cartContent">
+            <!-- Cart items will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">✓</span>
+        <span class="toast-message">Action successful</span>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        function loadCart() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const cartContent = document.getElementById('cartContent');
+
+            if (cart.length === 0) {
+                cartContent.innerHTML = `
+                    <div class="empty-cart">
+                        <div class="empty-cart-icon">🛒</div>
+                        <h2>Your cart is empty</h2>
+                        <p>Add some products to get started</p>
+                        <button class="btn btn-primary" onclick="window.location.href='index.html'">
+                            Continue Shopping
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            // Calculate totals
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const delivery = subtotal > 500 ? 0 : 40;
+            const total = subtotal + delivery;
+
+            cartContent.innerHTML = `
+                <div class="cart-grid">
+                    <!-- Cart Items -->
+                    <div class="cart-items">
+                        <h3 style="margin-bottom: 20px; font-size: 20px; font-weight: 600;">
+                            My Cart (${cart.length} ${cart.length === 1 ? 'item' : 'items'})
+                        </h3>
+                        ${cart.map(item => `
+                            <div class="cart-item" data-id="${item.id}">
+                                <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+                                <div class="cart-item-details">
+                                    <h3 class="cart-item-title">${item.name}</h3>
+                                    <p class="cart-item-price">₹${item.price.toLocaleString()}</p>
+                                    <div class="cart-item-actions">
+                                        <div class="quantity-selector">
+                                            <button class="quantity-btn" onclick="updateCartQuantity('${item.id}', ${item.quantity - 1})">-</button>
+                                            <span class="quantity-value">${item.quantity}</span>
+                                            <button class="quantity-btn" onclick="updateCartQuantity('${item.id}', ${item.quantity + 1})">+</button>
+                                        </div>
+                                        <button class="remove-btn" onclick="removeFromCart('${item.id}')">
+                                            🗑️ Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- Cart Summary -->
+                    <div class="cart-summary">
+                        <h3 class="summary-title">Price Details</h3>
+                        
+                        <div class="summary-row">
+                            <span>Price (${cart.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
+                            <span>₹${subtotal.toLocaleString()}</span>
+                        </div>
+                        
+                        <div class="summary-row">
+                            <span>Delivery Charges</span>
+                            <span style="color: ${delivery === 0 ? 'var(--success-green)' : 'inherit'}">
+                                ${delivery === 0 ? 'FREE' : '₹' + delivery}
+                            </span>
+                        </div>
+                        
+                        ${subtotal < 500 ? `
+                            <div class="summary-row" style="font-size: 13px; color: var(--success-green); margin-top: -10px;">
+                                <span>Add ₹${500 - subtotal} more for FREE delivery</span>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="summary-row total">
+                            <span>Total Amount</span>
+                            <span>₹${total.toLocaleString()}</span>
+                        </div>
+                        
+                        ${subtotal < 500 && delivery > 0 ? `
+                            <p style="font-size: 13px; color: var(--success-green); margin-top: 10px;">
+                                You will save ₹${delivery} on this order
+                            </p>
+                        ` : `
+                            <p style="font-size: 13px; color: var(--success-green); margin-top: 10px;">
+                                You saved ₹${delivery} on delivery!
+                            </p>
+                        `}
+                        
+                        <button class="btn btn-primary checkout-btn" onclick="proceedToCheckout()">
+                            Proceed to Checkout
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateCartQuantity(productId, newQuantity) {
+            if (newQuantity < 1) {
+                removeFromCart(productId);
+                return;
+            }
+
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const itemIndex = cart.findIndex(item => item.id === productId);
+
+            if (itemIndex !== -1) {
+                cart[itemIndex].quantity = newQuantity;
+                localStorage.setItem('cart', JSON.stringify(cart));
+                loadCart();
+                updateCartBadge();
+                showToast('Cart updated', 'success');
+            }
+        }
+
+        function removeFromCart(productId) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart = cart.filter(item => item.id !== productId);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            
+            // Animate removal
+            const cartItem = document.querySelector(`[data-id="${productId}"]`);
+            if (cartItem) {
+                cartItem.style.transform = 'translateX(-100%)';
+                cartItem.style.opacity = '0';
+                setTimeout(() => {
+                    loadCart();
+                    updateCartBadge();
+                }, 300);
+            }
+            
+            showToast('Item removed from cart', 'success');
+        }
+
+        function proceedToCheckout() {
+            const user = localStorage.getItem('user');
+            
+            if (!user) {
+                showToast('Please login to continue', 'error');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+                return;
+            }
+
+            window.location.href = 'checkout.html';
+        }
+
+        // Load cart on page load
+        loadCart();
+        updateCartBadge();
+        updateProfileName();
+    </script>
+</body>
+</html>

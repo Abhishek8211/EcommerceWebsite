@@ -1,0 +1,408 @@
+<!-- FRONTEND INTEGRATION GUIDE -->
+<!-- Add this to your HTML files to connect with backend -->
+
+<!-- 
+    STEP 1: Include API helper file in your HTML
+    Add this BEFORE your main script.js
+-->
+<script src="js/api.js"></script>
+<script src="js/script.js"></script>
+
+<!-- 
+    STEP 2: Update your existing login.html form handler
+    Replace your current login logic with this:
+-->
+
+<script>
+// LOGIN FORM HANDLER
+document.getElementById('login-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const emailOrMobile = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    
+    try {
+        showLoading('Logging in...');
+        
+        const response = await loginUser(emailOrMobile, password);
+        
+        hideLoading();
+        showToast('Login successful! Welcome back.', 'success');
+        
+        // Redirect to home page
+        setTimeout(() => {
+            window.location.href = '/index.html';
+        }, 1000);
+        
+    } catch (error) {
+        hideLoading();
+        showToast(error.message || 'Login failed', 'error');
+    }
+});
+
+// REGISTER FORM HANDLER
+document.getElementById('register-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const name = document.getElementById('register-name').value;
+    const email = document.getElementById('register-email').value;
+    const mobile = document.getElementById('register-mobile').value;
+    const password = document.getElementById('register-password').value;
+    
+    try {
+        showLoading('Creating account...');
+        
+        const response = await registerUser(name, email, mobile, password);
+        
+        hideLoading();
+        showToast('Account created successfully!', 'success');
+        
+        // Redirect to home page
+        setTimeout(() => {
+            window.location.href = '/index.html';
+        }, 1000);
+        
+    } catch (error) {
+        hideLoading();
+        showToast(error.message || 'Registration failed', 'error');
+    }
+});
+
+// OTP LOGIN HANDLER
+let otpMobile = '';
+
+document.getElementById('send-otp-btn')?.addEventListener('click', async () => {
+    const mobile = document.getElementById('otp-mobile').value;
+    
+    if (!/^[0-9]{10}$/.test(mobile)) {
+        showToast('Please enter valid 10-digit mobile number', 'error');
+        return;
+    }
+    
+    try {
+        showLoading('Sending OTP...');
+        otpMobile = mobile;
+        
+        const response = await sendOTP(mobile);
+        
+        hideLoading();
+        showToast('OTP sent to your mobile!', 'success');
+        
+        // Show OTP field (development only - shows OTP in console)
+        console.log('OTP:', response.otp);
+        
+        document.getElementById('otp-input-section').style.display = 'block';
+        
+    } catch (error) {
+        hideLoading();
+        showToast(error.message || 'Failed to send OTP', 'error');
+    }
+});
+
+document.getElementById('verify-otp-btn')?.addEventListener('click', async () => {
+    const otp = document.getElementById('otp-code').value;
+    
+    if (!/^[0-9]{6}$/.test(otp)) {
+        showToast('Please enter valid 6-digit OTP', 'error');
+        return;
+    }
+    
+    try {
+        showLoading('Verifying OTP...');
+        
+        const response = await verifyOTP(otpMobile, otp);
+        
+        hideLoading();
+        showToast('Login successful!', 'success');
+        
+        setTimeout(() => {
+            window.location.href = '/index.html';
+        }, 1000);
+        
+    } catch (error) {
+        hideLoading();
+        showToast(error.message || 'Invalid OTP', 'error');
+    }
+});
+</script>
+
+<!-- 
+    STEP 3: Update index.html to fetch products from backend
+    Replace the hardcoded products array
+-->
+
+<script>
+// LOAD PRODUCTS FROM BACKEND
+async function loadProducts(filters = {}) {
+    try {
+        showLoading('Loading products...');
+        
+        const products = await getProducts(filters);
+        
+        // Update your products array
+        window.products = products;
+        
+        // Render products
+        renderProducts(products);
+        
+        hideLoading();
+        
+    } catch (error) {
+        hideLoading();
+        showToast('Failed to load products', 'error');
+        console.error(error);
+    }
+}
+
+// Call on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadProducts();
+    
+    // Check if user is logged in
+    if (isLoggedIn()) {
+        updateUIForLoggedInUser();
+        loadUserCart();
+        loadUserNotifications();
+    }
+});
+
+// FILTER PRODUCTS BY CATEGORY
+function filterByCategory(category, subcategory = '') {
+    const filters = { category };
+    if (subcategory) filters.subcategory = subcategory;
+    
+    loadProducts(filters);
+}
+</script>
+
+<!-- 
+    STEP 4: Update cart to sync with backend
+-->
+
+<script>
+// LOAD USER CART FROM BACKEND
+async function loadUserCart() {
+    try {
+        const cart = await getCart();
+        
+        // Update cart UI
+        updateCartCount(cart.totalItems);
+        renderCartItems(cart.items);
+        
+    } catch (error) {
+        console.error('Failed to load cart:', error);
+    }
+}
+
+// ADD TO CART (BACKEND)
+async function addProductToCart(productId, quantity = 1) {
+    if (!isLoggedIn()) {
+        showToast('Please login to add items to cart', 'error');
+        window.location.href = '/login.html';
+        return;
+    }
+    
+    try {
+        showLoading('Adding to cart...');
+        
+        const cart = await addToCart(productId, quantity);
+        
+        hideLoading();
+        showToast('Added to cart!', 'success');
+        
+        updateCartCount(cart.totalItems);
+        
+    } catch (error) {
+        hideLoading();
+        showToast(error.message || 'Failed to add to cart', 'error');
+    }
+}
+
+// UPDATE CART ITEM
+async function updateCartItemQuantity(productId, quantity) {
+    try {
+        const cart = await updateCartItem(productId, quantity);
+        updateCartCount(cart.totalItems);
+        renderCartItems(cart.items);
+    } catch (error) {
+        showToast(error.message || 'Failed to update cart', 'error');
+    }
+}
+
+// REMOVE FROM CART
+async function removeCartItem(productId) {
+    try {
+        const cart = await removeFromCart(productId);
+        showToast('Item removed', 'success');
+        updateCartCount(cart.totalItems);
+        renderCartItems(cart.items);
+    } catch (error) {
+        showToast(error.message || 'Failed to remove item', 'error');
+    }
+}
+</script>
+
+<!-- 
+    STEP 5: Update checkout to create real orders
+-->
+
+<script>
+// CHECKOUT - CREATE ORDER
+document.getElementById('place-order-btn')?.addEventListener('click', async () => {
+    if (!isLoggedIn()) {
+        showToast('Please login to place order', 'error');
+        window.location.href = '/login.html';
+        return;
+    }
+    
+    // Get shipping address from form
+    const shippingAddress = {
+        fullName: document.getElementById('full-name').value,
+        mobile: document.getElementById('mobile').value,
+        email: document.getElementById('email').value,
+        address: document.getElementById('address').value,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        pincode: document.getElementById('pincode').value,
+        landmark: document.getElementById('landmark').value
+    };
+    
+    const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+    
+    // Get cart items
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const items = cart.map(item => ({
+        productId: item.id,
+        quantity: item.quantity
+    }));
+    
+    try {
+        showLoading('Placing order...');
+        
+        const order = await createOrder({
+            items,
+            shippingAddress,
+            paymentMethod
+        });
+        
+        hideLoading();
+        showToast('Order placed successfully!', 'success');
+        
+        // Clear cart UI
+        localStorage.removeItem('cart');
+        
+        // Redirect to order confirmation
+        setTimeout(() => {
+            window.location.href = `/order-success.html?orderId=${order._id}`;
+        }, 1500);
+        
+    } catch (error) {
+        hideLoading();
+        showToast(error.message || 'Order failed', 'error');
+    }
+});
+</script>
+
+<!-- 
+    STEP 6: Load notifications from backend
+-->
+
+<script>
+// LOAD USER NOTIFICATIONS
+async function loadUserNotifications() {
+    try {
+        const { notifications, unreadCount } = await getNotifications();
+        
+        // Update notification badge
+        updateNotificationBadge(unreadCount);
+        
+        // Render notifications
+        renderNotifications(notifications);
+        
+    } catch (error) {
+        console.error('Failed to load notifications:', error);
+    }
+}
+
+// MARK NOTIFICATION AS READ
+async function markNotificationRead(notificationId) {
+    try {
+        await markNotificationAsRead(notificationId);
+        loadUserNotifications(); // Reload
+    } catch (error) {
+        console.error('Failed to mark as read:', error);
+    }
+}
+
+// Call periodically to check for new notifications
+setInterval(() => {
+    if (isLoggedIn()) {
+        loadUserNotifications();
+    }
+}, 30000); // Every 30 seconds
+</script>
+
+<!-- 
+    STEP 7: Update UI based on login status
+-->
+
+<script>
+function updateUIForLoggedInUser() {
+    const user = getCurrentUser();
+    
+    // Show user name in navbar
+    const userNameElement = document.querySelector('.user-name');
+    if (userNameElement) {
+        userNameElement.textContent = user.name;
+    }
+    
+    // Show logout button, hide login button
+    document.querySelector('.login-btn')?.style.setProperty('display', 'none');
+    document.querySelector('.logout-btn')?.style.setProperty('display', 'block');
+    
+    // Add logout handler
+    document.querySelector('.logout-btn')?.addEventListener('click', logout);
+}
+
+// Protect checkout page
+if (window.location.pathname.includes('checkout.html') && !isLoggedIn()) {
+    showToast('Please login to continue', 'error');
+    window.location.href = '/login.html';
+}
+</script>
+
+<!-- 
+    STEP 8: Helper functions for UI
+-->
+
+<script>
+function showLoading(message = 'Loading...') {
+    // Implement your loading indicator
+    console.log(message);
+}
+
+function hideLoading() {
+    // Hide loading indicator
+}
+
+function showToast(message, type = 'info') {
+    // Your existing toast function
+    console.log(`${type}: ${message}`);
+}
+
+function updateCartCount(count) {
+    const cartCountElement = document.querySelector('.cart-count');
+    if (cartCountElement) {
+        cartCountElement.textContent = count;
+        cartCountElement.style.display = count > 0 ? 'block' : 'none';
+    }
+}
+
+function updateNotificationBadge(count) {
+    const badgeElement = document.querySelector('.notification-badge');
+    if (badgeElement) {
+        badgeElement.textContent = count;
+        badgeElement.style.display = count > 0 ? 'block' : 'none';
+    }
+}
+</script>

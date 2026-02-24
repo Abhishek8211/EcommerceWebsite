@@ -1,0 +1,21 @@
+{
+  "name": "shopsphere-frontend",
+  "version": "1.0.0",
+  "description": "ShopSphere E-commerce Frontend",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve .",
+    "start": "npx serve .",
+    "build": "echo 'Static site - no build required'"
+  },
+  "keywords": [
+    "ecommerce",
+    "shopping",
+    "frontend"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}
